@@ -1,0 +1,117 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>自助收银系统</title>
+    <script src="./libs/zepto.min.js"></script>
+    <style>
+        div{
+            font-size: 16px;
+        }
+        .welcomePage{
+            display: none;
+            text-align: center;
+        }
+        .welcomePage h2{
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%,-50%);
+        }
+        .detailPage{
+            /* display: none; */
+        }
+        ul{
+            margin:0;
+            padding:0;
+        }
+        ul li{
+            margin:0;
+            padding:0;
+            list-style:none;
+            display: flex;
+            justify-content: flex-start;
+            line-height: 2;
+            margin-top: 20px;
+        }
+
+        ul li img{
+            width: 150px;
+            height: 150px;
+            margin-right: 40px;
+        }
+        .btnGroup{
+            display: flex;
+            justify-content: flex-end;
+            width: 100%;
+        }
+        .payBtn{
+            width: 150px;
+            height: 50px;
+            background-color: red;
+            border: none;
+            color: white;
+            border-radius: 4px;
+            cursor: pointer;
+        }
+    </style>
+</head>
+<body>
+    <!-- 1 -->
+    <div class="welcomePage">
+        <h2>欢迎来到自助结算系统</h2>
+    </div>
+    <!-- 2 -->
+    <div>
+        <div>合计：200元</div>
+        <div>扫描下方二维码支付</div>
+        <div>
+            <img src="./img/code.jpg" />
+        </div>
+    </div>
+    <!-- 3 -->
+    <div class="detailPage">
+        <h2>自助收银</h2>
+        <div>
+            <div>
+                <div>商品信息：</div>
+                <ul class="items">
+                </ul>
+                <div class="btnGroup"><button class="payBtn">结算</button></div>
+            </div>
+        </div>
+    </div>
+    <script>
+        let proInfo=[{
+            rfid:'2014232323',id:1,name:"T恤",num:2,price:99,img:'./img/1.jpg'
+        },{
+            rfid:'2014232323', id:2,name:"裤子",num:1,price:320,img:'./img/2.jpg'
+        },
+        ];
+
+        // Create WebSocket connection.
+        const socket = new WebSocket('ws://localhost:5000');
+
+        // Connection opened
+        socket.addEventListener('open', function (event) {
+            socket.send('home init');//'admin:123456'
+        });
+
+        // Listen for messages
+        socket.addEventListener('message', function (event) {
+            console.log('Message from server ', event.data);
+            // 更新
+            var newDom = '';
+            for(var i =0; i <proInfo.length;i++){
+                newDom =newDom+ '<li> <div><img src="'+proInfo[i].img+'"  /></div><div><div>商品名称：<span>'+proInfo[i].name+
+                    '</span></div><div>商品价格：<span>'+ proInfo[i].price
+                        +'元</span></div><div>数量：<span>'+ proInfo[i].num
+                            +'件</span></div></div></li>'
+            }
+            $('.items').append(newDom);
+        });
+    </script>
+</body>
+</html>

@@ -1,0 +1,25 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>支付</title>
+</head>
+<body>
+    <div>
+        <button onclick="send()">确认</button>
+    </div>
+    <script>
+        function send(){
+            const socket = new WebSocket('ws://localhost:5000');
+            // Connection opened
+            socket.addEventListener('open', function (event) {
+                socket.send('test');//'admin:123456'
+                // setTimeout(function(){},200)
+                socket.close()
+            });
+        }
+    </script>
+</body>
+</html>
