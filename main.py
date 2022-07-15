@@ -22,6 +22,8 @@ def echo_app(environ, start_response):
 
 def http_handler(environ, start_response):
     if environ["PATH_INFO"].strip("/") == "version":
+        print(environ["QUERY_STRING"])
+        # http://localhost:5000/version?id=12
         start_response("200 OK", [])
         for us in user_list:  # 遍历发送给列表所有
             try:
@@ -40,33 +42,3 @@ WebSocketServer(("localhost", 5000), echo_app, debug=False).serve_forever()
 
 
 
-
-
-
-
-
-# from geventwebsocket import WebSocketServer, WebSocketApplication, Resource
-# from collections import OrderedDict
-# # 仓库地址：https://github.com/jgelens/gevent-websocket
-#
-# user_list = []
-# class EchoApplication(WebSocketApplication):
-#     def on_open(self):
-#         print("Connection opened")
-#
-#     def on_message(self, message):
-#         user_list.append(self.ws)
-#         # self.ws.send(message)
-#         for us in user_list:  # 遍历发送给列表所有
-#             try:
-#                 us.send(message)
-#             except:
-#                 continue
-#
-#     def on_close(self, reason):
-#         print(reason)
-#
-# WebSocketServer(
-#     ('localhost', 5000),
-#     Resource(OrderedDict([('/echo', EchoApplication)]))
-# ).serve_forever()
