@@ -30,7 +30,7 @@ def http_handler(environ, start_response):
                 us.send("get from http")
             except:
                 continue
-        return [b"agent"]
+        return [b"pay success"]
     else:
         start_response("400 Bad Request", [])
         return [b"WebSocket connection is expected here."]

@@ -15,7 +15,7 @@
             const socket = new WebSocket('ws://localhost:5000');
             // Connection opened
             socket.addEventListener('open', function (event) {
-                socket.send('test');//'admin:123456'
+                socket.send("[{'epc': 'b100000000000576', 'crc': '3ae1', 'rssi': '20'},{'epc': 'b100000000000578', 'crc': '3ae1', 'rssi': '20'}]");//'admin:123456'
                 // setTimeout(function(){},200)
                 socket.close()
             });

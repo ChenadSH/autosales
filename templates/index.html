@@ -1,5 +1,6 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
     <meta charset="UTF-8">
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
@@ -7,76 +8,136 @@
     <title>自助收银系统</title>
     <script src="./libs/zepto.min.js"></script>
     <style>
-        div{
-            font-size: 16px;
+        html,body{
+            width: 100%;
+            height: 100%;
+            overflow: hidden;
+            margin:0;
+            padding: 0;
         }
-        .welcomePage{
-            display: none;
+        div {
+            font-size: 26px;
+        }
+
+        .welcomePage {
+            display: block;
             text-align: center;
-        }
-        .welcomePage h2{
             position: absolute;
             top: 50%;
             left: 50%;
             transform: translate(-50%,-50%);
+            font-size: 2vw;
+            font-weight:300;
+            line-height: 1.2;
         }
-        .detailPage{
-            /* display: none; */
+
+        .welcomePage h2 {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
         }
-        ul{
-            margin:0;
-            padding:0;
+
+        .detailPage {
+            display: none;
+            padding: 2vw;
+            font-size: 2vw;
+            padding-left: 10vw;
+            padding-right: 10vw;
+            height: 100%;
+            overflow: auto;
         }
-        ul li{
-            margin:0;
-            padding:0;
-            list-style:none;
+
+        ul {
+            margin: 0;
+            padding: 0;
+        }
+
+        ul li {
+            margin: 0;
+            padding: 0;
+            list-style: none;
             display: flex;
             justify-content: flex-start;
             line-height: 2;
             margin-top: 20px;
         }
-
-        ul li img{
-            width: 150px;
-            height: 150px;
+        .protitle{
+            font-size: 2vw;
+        }
+        .infotxt div{
+            font-size: 1.8vw;
+            line-height: 1.5;
+        }
+        ul li img {
+            width: 200px;
+            height: 200px;
             margin-right: 40px;
         }
-        .btnGroup{
+
+        .btnGroup {
             display: flex;
             justify-content: flex-end;
             width: 100%;
+            margin-bottom: 5vw;
         }
-        .payBtn{
-            width: 150px;
-            height: 50px;
+
+        .payBtn {
+            width: 250px;
+            font-size: 2vw;
+            height: 60px;
             background-color: red;
             border: none;
             color: white;
             border-radius: 4px;
             cursor: pointer;
         }
+
+        .paymask {
+            display: none;
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0, 0, 0, 0.7);
+            color: white;
+            text-align: center;
+        }
+
+        .paycontent {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+        }
+        .qrcode{
+            width: 30vw;
+        }
     </style>
 </head>
+
 <body>
     <!-- 1 -->
     <div class="welcomePage">
-        <h2>欢迎来到自助结算系统</h2>
+        <h1>欢迎来到<br>自助结算系统</h1>
     </div>
     <!-- 2 -->
-    <div>
-        <div>合计：200元</div>
-        <div>扫描下方二维码支付</div>
-        <div>
-            <img src="./img/code.jpg" />
+    <div class="paymask">
+        <div class="paycontent">
+            <div>
+                <img id="qrcode" class="qrcode" src="./img/code.png" />
+            </div>
+            <div>扫描下方二维码支付</div>
         </div>
     </div>
     <!-- 3 -->
     <div class="detailPage">
-        <h2>自助收银</h2>
+        <h2>商品信息：</h2>
         <div>
             <div>
-                <div>商品信息：</div>
+                <!-- <div class="protitle">商品信息：</div> -->
                 <ul class="items">
                 </ul>
                 <div class="btnGroup"><button class="payBtn">结算</button></div>
@@ -84,10 +145,60 @@
         </div>
     </div>
     <script>
-        let proInfo=[{
-            rfid:'2014232323',id:1,name:"T恤",num:2,price:99,img:'./img/1.jpg'
+        var isPaying = false;
+        var payNum = 0;
+        $.ajax({
+                url: "https://www.dalalapic.com/wxpay/getPayNum.php",
+                success:function(e){
+                    payNum = e;
+                }
+            })
+        var checkPayInterval  =0;
+        var canCheckPay = true;
+        $('.payBtn').click(function () {
+            // 支付-- 如果支付码未生成，发起支付请求
+            clearInterval(checkPayInterval);
+            checkPayInterval = setInterval(function(){
+                if(!canCheckPay)return;
+                canCheckPay = false;
+                $.ajax({
+                    url: "https://www.dalalapic.com/wxpay/getPayNum.php",
+                    success:function(e){
+                        canCheckPay = true;
+                        if(payNum<e){
+                            clearInterval(checkPayInterval)
+                            payNum = e;
+                            alert('支付成功!');
+                            getRfidArr = [];
+                            getNewpayCode();
+                            $('.paymask').css({ 'display': 'none' })
+                            $('.detailPage').css({ 'display': 'none' })
+                            $('.welcomePage').css({ 'display': 'block' })
+                        }
+                    },
+                    error:function(){
+                        canCheckPay = true;
+                        clearInterval(checkPayInterval)
+                    }
+                })
+            },1000)
+            $('.paymask').css({ 'display': 'block' })
+        })
+        $('.paymask').click(function () {
+            clearInterval(checkPayInterval);
+            $('.paymask').css({ 'display': 'none' })
+        })
+        let proInfo = [
+        {
+            rfid: 'b100000000000575', id: 0, name: "纸杯", num: 1, price: 10, img: './img/5.jpg'
         },{
-            rfid:'2014232323', id:2,name:"裤子",num:1,price:320,img:'./img/2.jpg'
+            rfid: 'b100000000000576', id: 1, name: "T恤", num: 1, price: 99, img: './img/1.jpg'
+        }, {
+            rfid: 'b100000000000577', id: 2, name: "裤子", num: 1, price: 320, img: './img/2.jpg'
+        }, {
+            rfid: 'b100000000000578', id: 3, name: "袜子", num: 1, price: 320, img: './img/3.jpg'
+        }, {
+            rfid: 'aa59f0817062d7100062c6089000ff36', id: 4, name: "内裤", num: 1, price: 320, img: './img/4.jpg'
         },
         ];
 
@@ -99,19 +210,108 @@
             socket.send('home init');//'admin:123456'
         });
 
+        // 记录上一次收到的rfid
+        var getRfidArr = []
+
+        var needUpdateCount = 5;
+        setInterval(function(){
+            needUpdateCount = 5;
+        },2000)
+
         // Listen for messages
         socket.addEventListener('message', function (event) {
-            console.log('Message from server ', event.data);
-            // 更新
-            var newDom = '';
-            for(var i =0; i <proInfo.length;i++){
-                newDom =newDom+ '<li> <div><img src="'+proInfo[i].img+'"  /></div><div><div>商品名称：<span>'+proInfo[i].name+
-                    '</span></div><div>商品价格：<span>'+ proInfo[i].price
-                        +'元</span></div><div>数量：<span>'+ proInfo[i].num
-                            +'件</span></div></div></li>'
+            // console.log('Message from server ', event.data);
+            if (isPaying) return;
+            if (event.data == 'pay') {
+                return alert('支付成功！')
             }
-            $('.items').append(newDom);
+            try {
+                const getArr = eval('(' + event.data + ')');
+                // console.log(typeof(getArr))
+                if (typeof (getArr) == 'object') {
+                    $('.welcomePage').css({
+                        display: getArr.length ? 'none' : 'block'
+                    })
+                    $('.detailPage').css({
+                        display: !getArr.length ? 'none' : 'block'
+                    })
+                    
+                    const newRfidArr = getArr.map(obj=>{return obj.rfid}).sort();
+                    
+                    if(JSON.stringify(newRfidArr)!=JSON.stringify(getRfidArr)){
+                        // 判断是delete操作还是add
+                        if(getArr.length == 0 || getArr.length>getRfidArr.length || needUpdateCount<0){
+                            // 立即更新
+                            updateDom(getArr,newRfidArr)
+                            needUpdateCount=5
+                        }else{
+                            // 等会更新
+                            needUpdateCount--
+                        }
+                    }else{
+                        console.log('没有变化!')
+                    }
+                } else {
+                    console.log('非数组类型')
+                }
+            } catch (e) {
+                console.log(e)
+            }
         });
+        function sortBy(field) {
+            return function(a,b) {
+                return a[field].toLowerCase().localeCompare(b[field].toLowerCase())
+                // return a[field] - b[field];
+            }
+        }
+        function updateDom(getArr,newRfidArr){
+            getRfidArr = newRfidArr;
+            //
+            var newDom = '';
+            $('.items').empty();
+            getArr = getArr.sort(sortBy("epc"));
+            getArr.forEach(element => {
+                for (var i = 0; i < proInfo.length; i++) {
+                    if (element.epc == proInfo[i].rfid) {
+                        newDom = newDom + '<li> <div><img src="' + proInfo[i].img + '"  /></div><div class="infotxt"><div>商品名称：<span>' + proInfo[i].name +
+                            '</span></div><div >商品价格：<span>' + proInfo[i].price
+                            + '元</span></div><div>数量：<span>' + proInfo[i].num
+                            + '件</span></div></div></li>'
+                    }
+                }
+            });
+            $('.items').append(newDom);
+            //
+        }
     </script>
+
+
+<script>
+    function getNewpayCode(){
+        $.ajax({
+            url: "https://www.dalalapic.com/wxpay/index.php?type=getPay",
+            success:function(e){
+            if(e){
+                var xhr = new XMLHttpRequest();
+                xhr.onreadystatechange = function(){
+                    if (this.readyState == 4 && this.status == 200){
+                        //this.response is what you're looking for
+                        // handler(this.response);
+                        // console.log(this.response, typeof this.response);
+                        var img = document.getElementById('qrcode');//
+                        var url = window.URL || window.webkitURL;
+                        img.src = url.createObjectURL(this.response);
+                    }
+                }
+                xhr.open('GET', 'https://www.dalalapic.com/wxpay/qrcode.php?data='+e);
+                xhr.responseType = 'blob';
+                xhr.send();  
+            }
+            }
+        })
+    }
+    getNewpayCode();
+</script>
 </body>
+
 </html>
